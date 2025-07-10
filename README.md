@@ -1,37 +1,34 @@
-````markdown
-# llm-cti-playground
+# 💬 llm-cti-playground
 
-An interactive, modular GenAI playground designed to explore Large Language Models (LLMs) hands-on, tailored for Contact Center Integration (CTI) solutions architects. This project is structured in phases, each focusing on core GenAI concepts and practical use cases with easy-to-follow steps and lightweight dependencies.
+An interactive, modular GenAI playground to explore Large Language Models (LLMs) hands-on — tailored for Contact Center Integration (CTI) solution architects. This project is structured into independent **phases**, each teaching core GenAI concepts with minimal setup, clear code, and lightweight dependencies.
 
 ---
 
-## Model Choice and Setup Instructions
+## 🧠 Model Choice & Setup
 
-### Why TinyLLaMA is Our Priority Model
+### 🚀 Why TinyLLaMA Is Our Priority
 
-- **Lightweight and Fast:** At ~637 MB, TinyLLaMA runs smoothly on limited resource environments like WSL and cloud PCs without GPU.
-- **Low Friction:** Requires minimal setup and no special hardware or cloud access.
-- **Ideal for Learning:** Enables quick iterations and hands-on exploration of LLM concepts without long waits.
-- **Future-Proof:** Uses the Ollama CLI and API interface, making it easy to switch to larger models (like Mistral or Llama 3) without changing code.
-- **Expandable:** You can seamlessly upgrade to stronger models later.
+- ✅ **Lightweight & Fast**: Just ~637MB, perfect for WSL or cloud PCs.
+- ✅ **Low Resource**: Runs without GPU, internet, or external dependencies.
+- ✅ **Learning-Friendly**: Ideal for rapid prototyping & understanding LLM internals.
+- ✅ **Ollama-Compatible**: Swap to `llama3`, `mistral`, `phi3` easily later.
+- ✅ **Scalable**: Upgrade-ready without changing your app code.
 
-### How to Setup Ollama and Models
+---
 
-1. **Install Ollama CLI**  
-   Follow the official instructions here: [https://ollama.com/download](https://ollama.com/download)
+### 🔧 Setting Up Ollama & Model
 
-2. **Pull TinyLLaMA Model**  
+1. **Install Ollama**  
+   → Follow [https://ollama.com/download](https://ollama.com/download)
+
+2. **Pull & Run TinyLLaMA**
+
    ```bash
    ollama pull tinyllama
-````
-
-3. **Run TinyLLaMA Model**
-
-   ```bash
    ollama run tinyllama
    ```
 
-4. **Switch to Another Model (Optional)**
+3. **Switch to Another Model (Optional)**
 
    ```bash
    ollama pull mistral
@@ -40,145 +37,133 @@ An interactive, modular GenAI playground designed to explore Large Language Mode
 
 ---
 
-## Project Phases Overview
+## 🔍 Project Phases Overview
 
-Each phase is an independent module focusing on a specific capability. You can run and explore them separately.
+Each phase is isolated — run and understand them independently or combine them progressively.
 
 ---
 
-### Phase 1: CLI LLM Interaction
+### 📟 Phase 1: CLI Chat with LLM
 
-**Purpose:**
-Get familiar with basic LLM text interactions via CLI. Send prompts and receive text responses in your terminal.
-
-**Folder:** `phase1_llm_core`
-
-**How to Run:**
+- **Folder**: `phase1_llm_core`
+- **Goal**: Text-based interaction with TinyLLaMA in terminal.
 
 ```bash
 python chat_cli.py
 ```
 
-**Details:**
-
-* Uses Ollama CLI to send prompt to TinyLLaMA model.
-* Demonstrates basic prompt-response cycle.
+- Sends prompt → receives response using Ollama's local LLM API.
+- Great to understand basic prompt-response flow.
 
 ---
 
-### Phase 2: Streamlit Chat UI
+### 🌐 Phase 2: Streamlit Chat UI
 
-**Purpose:**
-Introduce a web-based chat interface for interactive conversation with the LLM.
-
-**Folder:** `phase2_chat_ui`
-
-**How to Run:**
+- **Folder**: `phase2_chat_ui`
+- **Goal**: Simple chat web app using Streamlit.
 
 ```bash
 streamlit run app.py
 ```
 
-**Details:**
-
-* Provides a simple chat UI in browser.
-* Connects to the same Ollama backend as Phase 1.
-* Improves user experience with a friendly GUI.
+- Replaces terminal with an elegant browser-based UI.
+- Keeps backend same (TinyLLaMA via Ollama).
 
 ---
 
-### Phase 3: Agent Assist with Retrieval-Augmented Generation (RAG)
+### 🧠 Phase 3: RAG for Agent Assist
 
-**Purpose:**
-Implement RAG architecture that combines document retrieval with LLM for context-aware responses, tailored for contact center use cases.
+- **Folder**: `phase3_agent_assist`
+- **Goal**: Build Retrieval-Augmented Generation (RAG) engine to power CTI Agent Assist use cases.
 
-**Folder:** `phase3_agent_assist`
+#### 📝 Ingest Docs into Vector DB
 
-**How to Run:**
+```bash
+python ingest.py
+```
 
-1. Ingest documents (PDF, DOCX, TXT) into vector store:
+#### 🔍 Query LLM with Retrieved Context
 
-   ```bash
-   python ingest.py
-   ```
-2. Run query app to ask questions based on uploaded documents:
+```bash
+python rag_chain.py
+```
 
-   ```bash
-   python rag_chain.py
-   ```
-
-**Details:**
-
-* Uses ChromaDB vector store with Sentence Transformers for embedding.
-* Retrieves relevant document chunks to supply context to LLM, improving answer accuracy.
-* Demo use case: Agent Assist for contact center knowledge base.
+- **Supported Files**: `.pdf`, `.docx`, `.txt`
+- Uses `ChromaDB` + `Sentence Transformers`
+- Retrieves chunks relevant to query before calling the LLM.
 
 ---
 
-### Phase 4: LiteMind Chat - Streamlit UI with RAG Integration
+### 💡 Phase 4: LiteMind Chat (RAG + Streamlit UI)
 
-**Purpose:**
-A polished Streamlit web chat interface that leverages RAG backend to answer user queries using uploaded documents and LLM.
-
-**Folder:** `phase4_litemind_chat`
-
-**How to Run:**
+- **Folder**: `phase4_litemind_chat`
+- **Goal**: Unified, production-style app combining RAG + UI.
 
 ```bash
 streamlit run app.py
 ```
 
-**Details:**
+- 📁 Uses previously ingested documents.
+- 🧠 Maintains **chat history** (session memory).
+- 🔄 Shows **"thinking..."** while model responds.
+- 💬 Feels like a mini ChatGPT trained on your internal docs.
 
-* Combines Phase 2 UI and Phase 3 RAG logic.
-* Shows thinking indicator while querying.
-* Supports chat history to maintain conversation context.
-* Displays context-based answers from your documents.
-
----
-
-## Additional Notes
-
-* **Document Formats Supported:** PDF, DOCX, TXT (others may require extensions).
-* **Vector Store Persistence:** Stored locally under `chroma_store` (ignored by git).
-* **Model API:** Ollama runs as a local server. Keep it running while using the app.
-* **Environment:** Uses Python `venv` for isolated dependencies.
-* **Recommended Python Version:** 3.10 or later.
+![Phase 4 UI](images/phase4_ui.png)
 
 ---
 
-## Getting Started
-
-1. Clone the repository
-2. Create and activate virtual environment:
-
-   ```bash
-   python3 -m venv venv
-   source venv/bin/activate
-   ```
-3. Install dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-4. Install and run Ollama with TinyLLaMA
-5. Explore each phase independently by navigating to respective folders and running the provided commands.
-
----
-
-## Project Structure
+## 📂 Project Structure
 
 ```
 llm-cti-playground/
-├── phase1_llm_core/       # CLI interaction scripts
-├── phase2_chat_ui/        # Streamlit chat UI
-├── phase3_agent_assist/   # RAG ingestion and query
-├── phase4_litemind_chat/  # Streamlit chat UI with RAG backend
+├── phase1_llm_core/         # CLI interaction
+├── phase2_chat_ui/          # Streamlit chat UI
+├── phase3_agent_assist/     # RAG document pipeline
+├── phase4_litemind_chat/    # Streamlit + RAG combo
+├── chroma_store/            # Chroma vector DB (ignored in Git)
+├── venv/                    # Virtual environment
+├── images/                  # Screenshots
 ├── requirements.txt
 ├── README.md
 ├── vision.md
-├── .gitignore
-└── chroma_store/          # Local vector DB storage (gitignored)
+└── .gitignore
 ```
 
 ---
+
+## ⚙️ Setup Instructions (Once)
+
+```bash
+# 1. Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Ensure Ollama is running TinyLLaMA
+ollama run tinyllama
+```
+
+---
+
+## 🧠 Extra Notes
+
+- 🧾 **Document Support**: PDF, DOCX, TXT (others can be added)
+- 💾 **Persistence**: Vector store in `chroma_store/` (excluded from Git)
+- 🧠 **LLM Behavior**: Queries can fallback to model's pretraining if no relevant context is retrieved
+- 📦 **Python Version**: Recommended 3.10+
+
+---
+
+## 🤝 Contribute or Extend
+
+- Add more phases like:
+  - 📢 **STT / TTS Voice Interface**
+  - 🗣️ **LangChain Agent Routing**
+  - 📡 **LLM API Gateway for Production**
+- Replace `TinyLLaMA` with `phi3`, `llama3`, etc.
+
+---
+
+> Made with ❤️ to help CTI Solution Architects embrace GenAI one phase at a time.
