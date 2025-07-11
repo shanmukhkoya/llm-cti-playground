@@ -8,17 +8,14 @@ import chromadb
 from chromadb.config import Settings
 from sentence_transformers import SentenceTransformer
 
-# Initialize Chroma client & collection (adjust your collection name & path)
+# ------------------ LLM + Chroma Setup ------------------ #
+
+OLLAMA_API_URL = "http://localhost:11434"
+embedder = SentenceTransformer("all-MiniLM-L6-v2")
+
 client = chromadb.PersistentClient(path="./chroma_store")
-collection_name = "agent_assist_docs"
-collection = client.get_collection(collection_name)
+collection = client.get_collection("agent_assist_docs")
 
-# Load embedding model for query encoding
-embedder = SentenceTransformer('all-MiniLM-L6-v2')
-
-OLLAMA_API_URL = "http://localhost:11434"  # Ollama API default port
-
-# Function: Query ChromaDB with embedding and get top docs
 def retrieve_docs(query, n_results=5):
     query_embedding = embedder.encode([query])[0].tolist()
     results = collection.query(
@@ -26,78 +23,97 @@ def retrieve_docs(query, n_results=5):
         n_results=n_results,
         include=["documents"]
     )
-    docs = results['documents'][0] if results and 'documents' in results else []
-    return docs
+    return results['documents'][0] if results and 'documents' in results else []
 
-# Function: Send prompt to Ollama CLI API (replace with your method if needed)
 def ask_ollama(prompt):
     try:
         response = requests.post(
-            "http://localhost:11434/api/generate",
+            f"{OLLAMA_API_URL}/api/generate",
             headers={"Content-Type": "application/json"},
-            json={
-                "model": "tinyllama",
-                "prompt": prompt,
-                "stream": False
-            }
+            json={"model": "tinyllama", "prompt": prompt, "stream": False},
+            timeout=60
         )
         response.raise_for_status()
-        data = response.json()
-        return data["response"]
+        return response.json()["response"]
     except Exception as e:
         return f"[Error] Ollama API: {e}"
 
-# Streamlit UI layout
-st.set_page_config(page_title="LiteMind Chat", page_icon="🤖", layout="centered")
+# ------------------ Streamlit Setup ------------------ #
 
-st.title("🤖 LiteMind Chat — Agent Assist Powered by TinyLLaMA + RAG")
+st.set_page_config(page_title="LiteMind Chat", layout="centered", initial_sidebar_state="auto")
 
-# Session state to keep chat history and debug toggle
+# Session state init
 if "history" not in st.session_state:
     st.session_state.history = []
+if "dark_mode" not in st.session_state:
+    st.session_state.dark_mode = False
 
-if "show_debug" not in st.session_state:
-    st.session_state.show_debug = False
+# Apply Dark Mode
+if st.session_state.dark_mode:
+    st.markdown("""
+    <style>
+    body, .stApp { background-color: #121212; color: #ffffff; }
+    .stTextInput > div > input, .stTextArea textarea {
+        background-color: #1e1e1e;
+        color: #ffffff;
+        border: 1px solid #333333;
+    }
+    </style>
+    """, unsafe_allow_html=True)
 
-# Debug toggle checkbox
-st.sidebar.checkbox("Show retrieved context (debug)", value=False, key="show_debug")
+# Sidebar Controls
+with st.sidebar:
+    st.title("⚙️ Settings")
+    if st.button("🧹 Clear Chat"):
+        st.session_state.history = []
+    st.session_state.dark_mode = st.checkbox("🌙 Dark Mode", value=st.session_state.dark_mode)
+    st.session_state.debug = st.checkbox("🔍 Show Retrieved Context", value=False)
 
-# Chat input form
-with st.form(key="chat_form", clear_on_submit=True):
-    user_input = st.text_input("Ask your question here...", "")
-    submit_button = st.form_submit_button("Send")
+# Main Title
+st.title("🤖 LiteMind Chat — Agent Assist RAG")
 
-if submit_button and user_input.strip():
-    with st.spinner("Thinking..."):
-        # Retrieve context docs from ChromaDB
-        retrieved_docs = retrieve_docs(user_input)
-        context_text = "\n\n".join(retrieved_docs) if retrieved_docs else ""
+# Chat History Display
+chat_container = st.container()
+input_container = st.container()
 
-        # Show retrieved docs if debug enabled
-        if st.session_state.show_debug:
-            st.markdown("**Retrieved documents for context:**")
-            for i, doc in enumerate(retrieved_docs):
-                st.markdown(f"> {doc}")
+with chat_container:
+    for role, msg in st.session_state.history:
+        with st.chat_message(role):
+            st.markdown(msg)
 
-        # Construct prompt with context + user query
-        prompt = f"""
+# Chat Input
+with input_container:
+    user_input = st.chat_input("Ask your document...")
+
+    if user_input:
+        st.session_state.history.append(("user", user_input))
+        with st.chat_message("user"):
+            st.markdown(user_input)
+
+        with st.chat_message("assistant"):
+            with st.spinner("Thinking..."):
+                context_docs = retrieve_docs(user_input)
+
+                if st.session_state.debug:
+                    st.markdown("**🔍 Retrieved Context:**")
+                    for doc in context_docs:
+                        st.markdown(f"> {doc[:300]}...")
+
+                context = "\n\n".join(context_docs)
+                prompt = f"""
 Context:
-{context_text}
+{context}
 
 User: {user_input}
-Assistant:
-"""
+Assistant:"""
+                reply = ask_ollama(prompt)
+                st.markdown(reply)
+                st.session_state.history.append(("assistant", reply))
 
-        # Query Ollama for answer
-        answer = ask_ollama(prompt)
-
-        # Update chat history
-        st.session_state.history.append(("User", user_input))
-        st.session_state.history.append(("LiteMind Chat", answer))
-
-# Display chat history
-for speaker, message in st.session_state.history:
-    if speaker == "User":
-        st.markdown(f"**You:** {message}")
-    else:
-        st.markdown(f"**{speaker}:** {message}")
+# Auto Scroll to Bottom
+st.markdown("""
+<script>
+const chatContainer = window.parent.document.querySelector('.main');
+if (chatContainer) chatContainer.scrollTo(0, chatContainer.scrollHeight);
+</script>
+""", unsafe_allow_html=True)

@@ -1,7 +1,9 @@
 chromadb==1.0.15
 pandas==2.3.1
+pydub==0.25.1
 PyPDF2==3.0.1
 python_docx==1.2.0
 Requests==2.32.4
 sentence_transformers==5.0.0
+speechrecognition==3.14.3
 streamlit==1.46.1
