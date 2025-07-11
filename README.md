@@ -1,7 +1,11 @@
 ````markdown
 # 💬 llm-cti-playground
 
-An interactive, modular GenAI playground to explore Large Language Models (LLMs) hands-on — tailored for Contact Center Integration (CTI) solution architects. This project is structured into independent **phases**, each teaching core GenAI concepts with minimal setup, clear code, and lightweight dependencies.
+An interactive, modular GenAI playground to explore Large Language Models (LLMs) hands-on —  
+tailored for Contact Center Integration (CTI) solution architects.  
+
+This project is structured into independent **phases**, each teaching core GenAI concepts  
+with minimal setup, clear code, and lightweight dependencies.
 
 ---
 
