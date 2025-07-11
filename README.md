@@ -109,8 +109,6 @@ streamlit run app.py
 * 🔄 Shows **"thinking..."** while model responds.
 * 💬 Feels like a mini ChatGPT trained on your internal docs.
 
-![Phase 4 UI](images/phase4_ui.png)
-
 ---
 
 ### 🎙️ Phase 5: Speech-to-Text (STT)
