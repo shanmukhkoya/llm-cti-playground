@@ -223,6 +223,12 @@ ollama run tinyllama
 
 ---
 
+## 📝 License
+
+This project is licensed under the [MIT License](LICENSE) — feel free to use, share, and adapt it with proper attribution.
+
+---
+
 > Made with ❤️ to help CTI Solution Architects embrace GenAI one phase at a time.
 
 ```
