@@ -13,10 +13,10 @@ with minimal setup, clear code, and lightweight dependencies.
 
 ### 🚀 Why TinyLLaMA Is Our Priority
 
-- ✅ **Lightweight & Fast**: Just ~637MB, perfect for WSL or cloud PCs.
-- ✅ **Low Resource**: Runs without GPU, internet, or external dependencies.
-- ✅ **Learning-Friendly**: Ideal for rapid prototyping & understanding LLM internals.
-- ✅ **Ollama-Compatible**: Swap to `llama3`, `mistral`, `phi3` easily later.
+- ✅ **Lightweight & Fast**: Just ~637MB, perfect for WSL or cloud PCs.  
+- ✅ **Low Resource**: Runs without GPU, internet, or external dependencies.  
+- ✅ **Learning-Friendly**: Ideal for rapid prototyping & understanding LLM internals.  
+- ✅ **Ollama-Compatible**: Swap to `llama3`, `mistral`, `phi3` easily later.  
 - ✅ **Scalable**: Upgrade-ready without changing your app code.
 
 ---
@@ -115,60 +115,63 @@ streamlit run app.py
 
 ---
 
-### 🎙️ Phase 5: Speech-to-Text (STT)
+### 🎙️ Phase 5: Speech-to-Text (STT) + LLM Response
 
 * **Folder**: `phase5_speech_io`
-* **Goal**: Convert audio files (MP3/WAV) into text using Whisper-based offline transcription.
+* **Goal**: Convert audio files (MP3/WAV) into text using Whisper-based offline transcription, then send transcribed text to LLM and display response.
 
 #### 🔊 Place your audio file:
 
-* Put `.mp3` or `.wav` files into the `phase5_speech_io/audio/` folder.
+* Put `.mp3` or `.wav` files into the `phase5_speech_io/audio_inputs/` folder.
 
-#### 🛠️ Run transcription:
+#### 🛠️ Run transcription & LLM chat:
 
 ```bash
-python phase5_speech_io/stt_transcribe.py
+python phase5_speech_io/speech_chat.py
 ```
 
-* Uses [Whisper](https://github.com/openai/whisper) via `whisperx` or `faster-whisper` (lightweight, GPU-free compatible).
-* Converts file to `.wav` using `pydub` if needed.
-* Displays & optionally saves the transcribed output.
+* Uses [Whisper](https://github.com/openai/whisper) via `faster-whisper` (lightweight, CPU-friendly) for transcription.
+* Converts files to `.wav` if needed with `pydub`.
+* Transcribes audio locally without internet.
+* Sends transcription to Ollama LLM (`tinyllama`) for conversational response.
+* Prints both transcription and LLM answer.
 
-#### Example Output:
+#### 🎤 Optional Mic Input Version:
 
+We also support real-time microphone capture to transcribe speech and send to LLM with minimal setup.
+
+```bash
+python phase5_speech_io/mic_transcribe_chat.py
 ```
-[Transcription Start]
-Today we will explain how to configure SAML-based SSO...
-[Transcription End]
-```
+
+* Requires microphone access (note: may not work inside WSL due to hardware constraints).
+* Demonstrates voice-to-text plus conversational AI flow.
 
 ---
 
-### 📢 What's Next?
+## ✅ Dependencies by Phase (Detailed)
 
-We’re building toward **multi-modal input**. Phase 5 sets the base for:
+| Phase | Tools / Libraries Used                                                               |
+| ----- | ------------------------------------------------------------------------------------ |
+| 1     | `requests`, `ollama`                                                                 |
+| 2     | `streamlit`, `requests`                                                              |
+| 3     | `chromadb`, `sentence-transformers`, `docx2txt`, `PyPDF2`, `unstructured`            |
+| 4     | Combines all above                                                                   |
+| 5     | `pydub`, `faster-whisper` (or `whisperx`), `speechrecognition`, `ffmpeg`, `requests` |
 
-* 🔁 **TTS** (Text-to-Speech) responses using local audio generation.
-* 🧠 Full **voice-to-voice assistant** over LLMs.
-
----
-
-## ✅ Dependencies by Phase
-
-| Phase | Tools / Libraries Used                                                    |
-| ----- | ------------------------------------------------------------------------- |
-| 1     | `requests`, `ollama`                                                      |
-| 2     | `streamlit`, `requests`                                                   |
-| 3     | `chromadb`, `sentence-transformers`, `docx2txt`, `PyPDF2`, `unstructured` |
-| 4     | Combines all above                                                        |
-| 5     | `pydub`, `whisperx` or `faster-whisper`, `speechrecognition`, `ffmpeg`    |
-
-> ℹ️ FFmpeg is required for audio conversion. Install via:
-
-```bash
-sudo apt install ffmpeg  # For Linux/WSL
-brew install ffmpeg      # For Mac
-```
+> ℹ️ **Important Notes:**
+>
+> * `ffmpeg` is a **system-level dependency** required for audio processing and conversion.
+> * Install `ffmpeg` via your OS package manager:
+>
+>   * Linux/WSL: `sudo apt install ffmpeg`
+>   * macOS: `brew install ffmpeg`
+> * For **Speech-to-Text (STT)**, we use OpenAI Whisper models through either:
+>
+>   * [`faster-whisper`](https://github.com/guillaumekln/faster-whisper) — optimized for CPU with faster inference, or
+>   * [`whisperx`](https://github.com/m-bain/whisperX) — more advanced alignment and enhanced transcription.
+> * The `speechrecognition` library acts as the interface to handle audio input and interact with the Whisper models.
+> * `requests` is used throughout to communicate with Ollama’s LLM API.
 
 ---
 
@@ -180,7 +183,7 @@ llm-cti-playground/
 ├── phase2_chat_ui/          # Streamlit chat UI
 ├── phase3_agent_assist/     # RAG document pipeline
 ├── phase4_litemind_chat/    # Streamlit + RAG combo
-├── phase5_speech_io/        # Speech-to-Text transcription
+├── phase5_speech_io/        # Speech-to-Text transcription + LLM chat
 ├── chroma_store/            # Chroma vector DB (ignored in Git)
 ├── venv/                    # Virtual environment
 ├── images/                  # Screenshots
@@ -215,8 +218,12 @@ ollama run tinyllama
   * 📢 **STT / TTS Voice Interface**
   * 🗣️ **LangChain Agent Routing**
   * 📡 **LLM API Gateway for Production**
+
 * Replace `TinyLLaMA` with `phi3`, `llama3`, etc.
 
 ---
 
 > Made with ❤️ to help CTI Solution Architects embrace GenAI one phase at a time.
+
+```
+
